@@ -2,9 +2,13 @@
 
 // Mise en place autoload
 
+use App\core\corsMiddleWare;
 use App\core\Database;
 use App\core\Router;
 require_once __DIR__ . '/../bootstrap.php';
+
+$corsMiddleWare = new corsMiddleWare();
+$corsMiddleWare->handle();
 
 try {
     $router = new Router();
