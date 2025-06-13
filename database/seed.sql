@@ -1,18 +1,18 @@
 -- ➡️  Utilisateurs
-INSERT INTO `user` (username, avatar, email, password_hash, created_at) VALUES
-( 'Sulyvane',   'sulyvane.png',   'sulyvane@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-01-15 10:22:00'),
-( 'Leo',     'Leo.jpg',     'Leo@example.com',    '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-01-16 09:04:00'),
-( 'Jean-Baptiste',  'Jean-Baptiste.jpg',  'Jean-Baptiste@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-02-03 14:37:00'),
-( 'Frederic',   'Frederic.png',   'Frederic@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-02-11 18:20:00'),
-( 'Jonathan',    'Jonathan.jpg',    'Jonathan@example.com',   '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-03-01 08:42:00'),
-( 'Nathalie',   'Nathalie.png',   'Nathalie@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-03-07 19:11:00'),
-( 'Magalie',  'Magalie.jpg',  'Magalie@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-04-05 12:05:00'),
-( 'Nicolas',  'Nicolas.jpg',  'Nicolas@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-04-05 12:05:00'),
-( 'Thomas',  'Thomas.jpg',  'Thomas@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-04-05 12:05:00'),
-( 'Nadia',  'Nadia.jpg',  'Nadia@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-04-05 12:05:00'),
-( 'Hugo',  'Hugo.jpg',  'Hugo@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-04-05 12:05:00'),
-( 'Christophe',  'Christophe.jpg',  'Christophe@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-04-05 12:05:00'),
-( 'Bryan',   'Bryan.jpg',   'Bryan@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '2025-04-20 16:33:00');
+INSERT INTO `user` (username, avatar, email, password, `role`, created_at) VALUES
+( 'Sulyvane',   'sulyvane.png',   'sulyvane@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-01-15 10:22:00'),
+( 'Leo',     'Leo.jpg',     'Leo@example.com',    '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-01-16 09:04:00'),
+( 'Jean-Baptiste',  'Jean-Baptiste.jpg',  'Jean-Baptiste@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-02-03 14:37:00'),
+( 'Frederic',   'Frederic.png',   'Frederic@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2y0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-02-11 18:20:00'),
+( 'Jonathan',    'Jonathan.jpg',    'Jonathan@example.com',   '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-03-01 08:42:00'),
+( 'Nathalie',   'Nathalie.png',   'Nathalie@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-03-07 19:11:00'),
+( 'Magalie',  'Magalie.jpg',  'Magalie@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-04-05 12:05:00'),
+( 'Nicolas',  'Nicolas.jpg',  'Nicolas@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-04-05 12:05:00'),
+( 'Thomas',  'Thomas.jpg',  'Thomas@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-04-05 12:05:00'),
+( 'Nadia',  'Nadia.jpg',  'Nadia@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-04-05 12:05:00'),
+( 'Hugo',  'Hugo.jpg',  'Hugo@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-04-05 12:05:00'),
+( 'Christophe',  'Christophe.jpg',  'Christophe@example.com', '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-04-05 12:05:00'),
+( 'Bryan',   'Bryan.jpg',   'Bryan@example.com',  '$2y$10$2RWot3AW6eFNeRXKDfZNAuqZHu8y/RzFExt2yD0dku/.i1upXbDWG', '["ROLE_USER"]', '2025-04-20 16:33:00');
 
 -- ➡️  Compétences
 INSERT INTO skill (id_user, title, infos, etat, created_at, updated_at) VALUES
