@@ -1,17 +1,59 @@
 <?php
 declare(strict_types=1);
 namespace App\controller;
-use App\core\attribute\Route;
-use App\model\User;
-use App\repository\UserRepository;
-use App\services\FileUploadService;
-use App\services\JWTService;
-use App\services\MailService;
 use DateTime;
 use Exception;
+use App\model\User;
+use App\services\JWTService;
+use App\services\MailService;
+use App\core\attribute\Route;
+use App\repository\UserRepository;
+use App\services\FileUploadService;
 
 class UserController
 {
+     
+    private UserRepository $userRepository;
+    public function __construct() {
+        $this->userRepository = new UserRepository;
+    }
+
+    public function verifyUniqueUserEntry(array $data, ?User $currentUser = null): void
+{
+    error_log("Validation data: " . json_encode($data));
+    error_log("Current user: " . ($currentUser ? $currentUser->getUsername() . " / " . $currentUser->getEmail() : "null"));
+    
+    $usernameExists = false;
+    $emailExists = false;
+
+    // Check username only if it's provided and different from current user's username
+    if (!empty($data['username'])) {
+        error_log("Checking username: " . $data['username']);
+        if ($currentUser === null || $data['username'] !== $currentUser->getUsername()) {
+            error_log("Username is different from current, checking database...");
+            $existingUser = $this->userRepository->findUserByUsername($data['username']);
+            $usernameExists = $existingUser ? true : false;
+            error_log("Username exists: " . ($usernameExists ? "yes" : "no"));
+        } else {
+            error_log("Username same as current user, skipping check");
+        }
+    }
+
+    // Same for email...
+    if (!empty($data['email'])) {
+        error_log("Checking email: " . $data['email']);
+        if ($currentUser === null || $data['email'] !== $currentUser->getEmail()) {
+            error_log("Email is different from current, checking database...");
+            $existingUser = $this->userRepository->findUserByEmail($data['email']);
+            $emailExists = $existingUser ? true : false;
+            error_log("Email exists: " . ($emailExists ? "yes" : "no"));
+        } else {
+            error_log("Email same as current user, skipping check");
+        }
+    }
+
+    // Rest of validation...
+}
 
     #[Route('/api/upload-avatar', 'POST')]
     public function uploadAvatar() 
@@ -40,8 +82,7 @@ class UserController
     try {
         $data = json_decode(file_get_contents('php://input'), true);
         if (!$data) throw new Exception('Json invalide');
-        $userRepository = new UserRepository();
-        $user = $userRepository->findUserByEmail($data['email']);
+        $user = $this->userRepository->findUserByEmail($data['email']);
         if (!$user) throw new Exception('Email ou mot de passe incorrect !');
         if (!password_verify($data['password'], $user->getPassword())) throw new Exception
         ('Email ou mot de passe incorrect');
@@ -79,13 +120,6 @@ class UserController
         try {
         $data = json_decode(file_get_contents('php://input'), true);
         if (!$data) throw new Exception('Json invalide');
-        $userRepository = new UserRepository();
-        if ($userRepository->findUserByUserName($data['username'])) {
-            throw new Exception('Ce nom d\'utilisateur est déjà pris!');
-        }
-        if ($userRepository->findUserByEmail($data['email'])) {
-            throw new Exception('Cette adresse email est déjà utilisée!');
-        }
 
         $emailToken = bin2hex(random_bytes(32));
 
@@ -99,8 +133,11 @@ class UserController
 
         // création user 
         $user = new User($userData);
+        $this->verifyUniqueUserEntry($data, $user);
+
         $user->setCreatedAt((new DateTime())->format('Y-m-d H:i:s'));
-        $saved = $userRepository->save($user);
+
+        $saved = $this->userRepository->save($user);
 
         if (!$saved) throw new Exception('Erreur lors de la sauvegarde');
 
@@ -129,15 +166,15 @@ class UserController
         
         if (!$token) throw new Exception('Token manquant!');
 
-        $userRepository = new UserRepository();
-        $user = $userRepository->findUserByToken($token);
+
+        $user = $this->userRepository->findUserByToken($token);
 
         if (!$user) throw new Exception('Utilisateur introuvable');
 
         $user->setEmailToken(null);
         $user->setIsVerified(true);
 
-        $updated = $userRepository->update($user);
+        $updated = $this->userRepository->update($user);
         if (!$updated) throw new Exception("Erreur lors de la mise à jour de l'utilisateur !");
         echo json_encode([
             'success' => true,
@@ -153,4 +190,120 @@ class UserController
         ]);
     }
   }
+
+  #[Route('/api/user/update', 'POST')]
+  public function updateProfil() {
+    try {
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!$data) throw new Exception('Json invalide');
+        // Récupération token 
+        $headers = getallheaders();
+        $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+
+        $token = str_replace('Bearer ', '', $authHeader);
+        if (!$token) throw new \Exception('Not authorized');
+
+        // Appel du service JWT pour vérifier le token
+        $verifToken = JWTService::verify($token);
+        if (!$verifToken) throw new Exception('Token invalide');
+        $user = $this->userRepository->findUserById($verifToken['id_user']);
+        if (!$user) throw new Exception('Utilisateur non trouvé');
+
+        $this->verifyUniqueUserEntry($data, $user);
+
+        // mettre à jour les infos utilisateurs
+        if (isset($data['username'])) $user->setUsername($data['username']);
+        if (isset($data['useremail'])) $user->setEmail($data['useremail']);
+       // si autre champs à modifier
+        // if (isset($data['firstname'])) $user->setFirstName($data['firstname']); // faut avoir le champ dans la bdd
+
+        $update = $this->userRepository->update($user);
+
+        if (!$update) throw new Exception('Problème update utilisateur BDD');
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Profil mis à jour avec succès !'
+        ]);
+
+  } catch (\Exception $e) {
+        error_log('Erreur inscription: ' . $e->getMessage());
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+  }
+
+   #[Route('/api/user/update-avatar', 'POST')]
+    /**
+     * Met à jour l'avatar de l'utilisateur
+     * Route : POST /api/user/update-avatar
+     */
+    public function updateAvatar(): void
+    {
+        try {
+            // Récupération token
+            $headers = getallheaders();
+            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+
+            $token = str_replace('Bearer ', '', $authHeader);
+            if (!$token) throw new \Exception('Not authorized');
+
+
+            if (!$token) {
+                throw new \Exception('Non autorisé');
+            }
+
+            $payload = JWTService::verify($token);
+            if (!$payload) {
+                throw new \Exception('Token invalide');
+            }
+
+            if (!isset($_FILES['avatar'])) {
+                throw new \Exception('Aucun fichier envoyé');
+            }
+
+            $user = $this->userRepository->findUserById($payload['id_user']);
+
+            if (!$user) {
+                throw new \Exception('Utilisateur non trouvé');
+            }
+
+            // Gérer l'upload de l'avatar
+            try {
+                $upload_dir = __DIR__ . '/../../public/uploads/avatar/';
+                $avatarFilename = FileUploadService::handleAvatarUpload($_FILES
+                ['avatar'], $upload_dir);
+
+                // Supprimer l'ancien avatar si il existe
+                if ($user->getAvatar()&& $user->getAvatar() !== 'mon_avatar_par_defaut.jpg') {
+                    FileUploadService::deleteOldAvatar($user->getAvatar($upload_dir));
+                }
+
+                $user->setAvatar($avatarFilename);
+                $updated = $this->userRepository->update($user);
+
+                if (!$updated) {
+                    throw new \Exception('Erreur lors de la mise à jour');
+                }
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Avatar mis à jour avec succès',
+                    'avatar' => $avatarFilename
+                ]);
+            } catch (\Exception $e) {
+                throw new \Exception('Erreur lors de l\'upload: ' . $e->getMessage());
+            }
+        } catch (\Exception $e) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
 }
