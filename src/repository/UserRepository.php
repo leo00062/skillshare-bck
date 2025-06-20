@@ -92,7 +92,7 @@ class UserRepository
 
       public function update(User $user): bool
     {
-        $stmt = $this->pdo->prepare(
+         $stmt = $this->pdo->prepare(
             "UPDATE user SET 
             username = ?, 
             email = ?, 
@@ -101,8 +101,11 @@ class UserRepository
             email_token = ?,
             verified_at = ?,
             password = ?,
-            avatar = ?
+            avatar = ? ,
+            reset_at = ?,
+            reset_token = ? ,
             WHERE id_user = ?"
+
         );
 
         return $stmt->execute([
@@ -114,7 +117,31 @@ class UserRepository
             $user->getVerifiedAt(),
             $user->getPassword(),
             $user->getAvatar(),
-            $user->getId()
+            $user->getId(),
+            $user->getResetAt(),
+            $user->getResetToken()
         ]);
+    }
+    /**
+     * Trouve un utilisateur par son token de réinitialisation
+     * @param string $token
+     * @return User|null
+     */
+    public function findByResetToken(string $token): ?User
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM user WHERE reset_token = ?");
+        $stmt->execute([$token]);
+        $data = $stmt->fetch();
+        if (!$data) return null;
+
+        $data['is_verified'] = (bool)$data['is_verified']; // Convertir en booléen
+        $user = new User($data);
+        $user->setId((int)$data['id']);
+        $user->setRole($data['role']);
+        $user->setEmailToken($data['email_token']);
+        $user->setPassword($data['password']);
+        $user->setResetToken($data['reset_token']);
+        $user->setResetAt($data['reset_at'] ? new \DateTime($data['reset_at']) : null);
+        return $user;
     }
 }
